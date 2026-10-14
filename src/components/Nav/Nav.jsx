@@ -3,7 +3,7 @@ import './Nav.css'
 import {Link} from 'react-scroll'
 import {useGSAP} from '@gsap/react' 
 import gsap from 'gsap'
-function Nav() {
+function Nav({ theme, onThemeChange }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const closeMobileMenu = () => setIsMobileMenuOpen(false)
 
@@ -26,9 +26,22 @@ function Nav() {
   return (
     <nav className="site-nav">
         <h1>ADITYA</h1>
+        <button
+          className="theme-toggle"
+          type="button"
+          aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+          aria-pressed={theme === "light"}
+          onClick={() => onThemeChange(theme === "dark" ? "light" : "dark")}
+        >
+          <span aria-hidden="true">{theme === "dark" ? "☀" : "☾"}</span>
+          <span>{theme === "dark" ? "Light" : "Dark"} mode</span>
+        </button>
         <ul className= 'desktopmenu'>
             <Link to="home" activeClass="active" spy={true} smooth={true} duration={100}><li>Home</li></Link>
             <Link to="about" activeClass="active" spy={true} smooth={true} duration={100}><li>About</li></Link>
+            <Link to="skills" activeClass="active" spy={true} smooth={true} duration={100}><li>Skills</li></Link>
+            <Link to="experience" activeClass="active" spy={true} smooth={true} duration={100}><li>Experience</li></Link>
+            <Link to="education" activeClass="active" spy={true} smooth={true} duration={100}><li>Education</li></Link>
             <Link to="projects" activeClass="active" spy={true} smooth={true} duration={100}><li>Projects</li></Link>
             <Link to="contact" activeClass="active" spy={true} smooth={true} duration={100}><li>Contact</li></Link>
             
@@ -53,6 +66,9 @@ function Nav() {
         >
             <Link to="home" activeClass="active" spy={true} smooth={true} duration={500} onClick={closeMobileMenu}><li>Home</li></Link>
             <Link to="about" activeClass="active" spy={true} smooth={true} duration={500} onClick={closeMobileMenu}><li>About</li></Link>
+            <Link to="skills" activeClass="active" spy={true} smooth={true} duration={500} onClick={closeMobileMenu}><li>Skills</li></Link>
+            <Link to="experience" activeClass="active" spy={true} smooth={true} duration={500} onClick={closeMobileMenu}><li>Experience</li></Link>
+            <Link to="education" activeClass="active" spy={true} smooth={true} duration={500} onClick={closeMobileMenu}><li>Education</li></Link>
             <Link to="projects" activeClass="active" spy={true} smooth={true} duration={500} onClick={closeMobileMenu}><li>Projects</li></Link>
             <Link to="contact" activeClass="active" spy={true} smooth={true} duration={500} onClick={closeMobileMenu}><li>Contact</li></Link>
             

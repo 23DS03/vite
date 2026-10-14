@@ -257,16 +257,29 @@
     width: 100px;
     min-height: 50px;
     padding: 0;
-    border: 1px solid antiquewhite;
+    border: 1px solid rgb(202, 124, 21);
     border-radius: 20px;
-    background-color: antiquewhite;
+    background-color: rgb(202, 124, 21);
+    color: #fffaf3;
     font-weight: 600;
     cursor: pointer;
+    transition: background-color .2s ease, border-color .2s ease, color .2s ease, transform .2s ease;
 }
 
 #btn:hover{
-    background-color: transparent;
-    color: antiquewhite;
+    transform: translateY(-2px);
+    border-color: rgb(235, 164, 76);
+    background-color: rgb(175, 99, 12);
+    color: #fff;
+}
+
+#btn:focus-visible{
+    outline: 3px solid rgba(0, 255, 255, .55);
+    outline-offset: 3px;
+}
+
+#btn:active{
+    transform: translateY(0);
 }
 
 @media (max-width: 750px){

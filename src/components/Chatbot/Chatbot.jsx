@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import "./Chatbot.css";
 
+const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/+$/, "");
+
 const suggestedQuestions = [
   "What projects has Aditya built?",
   "What are his skills?",
@@ -50,7 +52,7 @@ function Chatbot() {
       .filter((message) => (
         message.role === "user" || (message.role === "assistant" && message.id !== 0)
       ))
-      .slice(-10)
+      .slice(-30)
       .map(({ role, text }) => ({ role, text }));
     const userMessage = {
       id: messageIdRef.current++,
@@ -63,7 +65,7 @@ function Chatbot() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/chat", {
+      const response = await fetch(`${apiBaseUrl}/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: trimmedQuestion, history: conversation }),
@@ -72,7 +74,9 @@ function Chatbot() {
       try {
         result = await response.json();
       } catch {
-        throw new Error("The AI API returned an unreadable response. Check that the API server is running.");
+        throw new Error(
+          `The AI API endpoint returned a non-JSON response (HTTP ${response.status}). Check VITE_API_BASE_URL and confirm the deployed API is reachable.`,
+        );
       }
 
       if (!response.ok) {

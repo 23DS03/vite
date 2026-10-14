@@ -1,20 +1,32 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import About from "./components/About/About";
 import Contact from "./components/Contact/Contact";
 import Home from "./components/Home/Home";
 import Nav from "./components/Nav/Nav";
 import Projects from "./components/Projects/Projects";
+import AdditionalSections from "./components/AdditionalSections/AdditionalSections";
 import Chatbot from "./components/Chatbot/Chatbot";
 import "./App.css";
+import "./theme.css";
 
 export default function App() {
   const [activeInfoDialog, setActiveInfoDialog] = useState(null);
+  const [theme, setTheme] = useState(() => (
+    window.localStorage.getItem("portfolio-theme") === "light" ? "light" : "dark"
+  ));
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+    window.localStorage.setItem("portfolio-theme", theme);
+  }, [theme]);
 
   return (
-    <>
-    <Nav/>
+    <div id="portfolio-root" data-theme={theme}>
+    <Nav theme={theme} onThemeChange={setTheme}/>
     <Home/>
     <About/>
+    <AdditionalSections/>
     <Projects/>
     <Contact/>
     <footer className="site-footer">
@@ -69,6 +81,6 @@ export default function App() {
       </div>
     )}
     <Chatbot/>
-    </>
+    </div>
   )
 }
