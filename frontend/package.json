@@ -5,9 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node dev.js",
-    "dev:api": "node --env-file=.env server.js",
-    "start": "node server.js",
-    "start:api": "node server.js",
+    "dev:api": "node --env-file=../backend/.env ../backend/server.js",
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview"

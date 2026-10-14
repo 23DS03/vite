@@ -4,12 +4,12 @@ import { setTimeout as delay } from "node:timers/promises";
 import { createServer } from "vite";
 
 try {
-  loadEnvFile(".env");
+  loadEnvFile("../backend/.env");
 } catch (error) {
   if (error.code !== "ENOENT") throw error;
 }
 
-const apiProcess = spawn(process.execPath, ["server.js"], {
+const apiProcess = spawn(process.execPath, ["../backend/server.js"], {
   env: process.env,
   stdio: "inherit",
 });
