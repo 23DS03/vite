@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "node dev.js",
     "dev:api": "node --env-file=.env server.js",
+    "start": "node server.js",
     "start:api": "node server.js",
     "build": "vite build",
     "lint": "oxlint",

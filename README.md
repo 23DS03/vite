@@ -15,7 +15,9 @@ The API uses Groq's `openai/gpt-oss-120b` model and answers portfolio questions 
 
 ## Production deployment
 
-Build the frontend with `npm run build`. Deploy the Node API as a separate web service (start command: `npm run start:api`) or alongside the frontend. Set `GROQ_API_KEY` in the API service's server-side environment variables; the API uses the hosting platform's `PORT` variable, with `API_PORT` as a fallback. Do not require or upload a local `.env` file in production. The API must be reachable from the public internet or from the frontend host; it listens on all interfaces so container and reverse-proxy hosts can reach it.
+Build the frontend with `npm run build`. To serve the frontend and API together from one Node web service, use `npm start` as the service's start command; set `GROQ_API_KEY` in the service's server-side environment variables. The service uses the hosting platform's `PORT` variable, with `API_PORT` as a fallback. Do not require or upload a local `.env` file in production. Build the frontend before starting the service. With this setup, leave `VITE_API_BASE_URL` empty: the frontend and API share an origin, so chat requests reach the API directly.
+
+Alternatively, deploy the Node API as a separate web service with `npm run start:api` and host the static frontend separately. The API must be reachable from the public internet or from the frontend host; it listens on all interfaces so container and reverse-proxy hosts can reach it.
 
 If the frontend and API use different domains, set `VITE_API_BASE_URL` to the API's public base URL (for example, `https://portfolio-api.example.com`, without `/api`) in the frontend hosting environment **before building**, and set `FRONTEND_ORIGIN` on the API service to the frontend's exact origin (for example, `https://portfolio.example.com`). Redeploy the frontend after changing its build variable. If both share an origin, leave `VITE_API_BASE_URL` empty and configure the hosting platform or reverse proxy to forward `/api/*` requests to the API process. After deploying the API, open `https://<your-api-host>/api/health`; it must return JSON before testing chat from the frontend.
 

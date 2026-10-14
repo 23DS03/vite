@@ -1,6 +1,11 @@
 import { createServer } from "node:http";
+import { createReadStream } from "node:fs";
+import { stat } from "node:fs/promises";
+import { extname, resolve, sep } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const port = Number(process.env.PORT || process.env.API_PORT || 3001);
+const frontendDirectory = resolve(fileURLToPath(new URL("./dist/", import.meta.url)));
 const frontendOrigin = process.env.FRONTEND_ORIGIN?.trim().replace(/\/+$/, "");
 const apiKey = process.env.GROQ_API_KEY?.trim();
 const isGroqConfigured = Boolean(
@@ -32,6 +37,98 @@ function sendJson(response, statusCode, payload) {
     "X-Content-Type-Options": "nosniff",
   });
   response.end(JSON.stringify(payload));
+}
+
+async function serveFrontend(request, response, pathname) {
+  let decodedPath;
+  try {
+    decodedPath = decodeURIComponent(pathname);
+  } catch {
+    sendJson(response, 400, { error: "Invalid URL path." });
+    return;
+  }
+
+  const requestedPath = resolve(frontendDirectory, `.${decodedPath}`);
+  if (
+    requestedPath !== frontendDirectory &&
+    !requestedPath.startsWith(`${frontendDirectory}${sep}`)
+  ) {
+    sendJson(response, 404, { error: "Page not found." });
+    return;
+  }
+
+  let filePath = requestedPath;
+  try {
+    const fileStats = await stat(filePath);
+    if (!fileStats.isFile()) {
+      filePath = resolve(frontendDirectory, "index.html");
+    }
+  } catch (error) {
+    if (error.code !== "ENOENT" && error.code !== "ENOTDIR") {
+      console.error("Could not access frontend build file.", error.message);
+      sendJson(response, 500, { error: "Could not serve the frontend." });
+      return;
+    }
+
+    if (extname(decodedPath)) {
+      sendJson(response, 404, { error: "Frontend asset not found." });
+      return;
+    }
+
+    filePath = resolve(frontendDirectory, "index.html");
+  }
+
+  let fileStats;
+  try {
+    fileStats = await stat(filePath);
+  } catch (error) {
+    if (error.code === "ENOENT" || error.code === "ENOTDIR") {
+      sendJson(response, 503, { error: "Frontend build not found. Run npm run build before starting the production server." });
+      return;
+    }
+    console.error("Could not access frontend build file.", error.message);
+    sendJson(response, 500, { error: "Could not serve the frontend." });
+    return;
+  }
+
+  const contentTypes = {
+    ".css": "text/css; charset=utf-8",
+    ".html": "text/html; charset=utf-8",
+    ".ico": "image/x-icon",
+    ".jpeg": "image/jpeg",
+    ".jpg": "image/jpeg",
+    ".js": "text/javascript; charset=utf-8",
+    ".json": "application/json; charset=utf-8",
+    ".pdf": "application/pdf",
+    ".png": "image/png",
+    ".svg": "image/svg+xml",
+    ".txt": "text/plain; charset=utf-8",
+    ".webp": "image/webp",
+    ".woff": "font/woff",
+    ".woff2": "font/woff2",
+  };
+  response.writeHead(200, {
+    "Content-Type": contentTypes[extname(filePath).toLowerCase()] || "application/octet-stream",
+    "Content-Length": fileStats.size,
+    "Cache-Control": "no-cache",
+    "X-Content-Type-Options": "nosniff",
+  });
+
+  if (request.method === "HEAD") {
+    response.end();
+    return;
+  }
+
+  const stream = createReadStream(filePath);
+  stream.on("error", (error) => {
+    console.error("Could not read frontend build file.", error.message);
+    if (!response.headersSent) {
+      sendJson(response, 500, { error: "Could not serve the frontend." });
+    } else {
+      response.destroy();
+    }
+  });
+  stream.pipe(response);
 }
 
 async function readJsonBody(request) {
@@ -223,6 +320,13 @@ const server = createServer(async (request, response) => {
   }
 
   if (request.method !== "POST" || requestUrl.pathname !== "/api/chat") {
+    if (
+      !requestUrl.pathname.startsWith("/api/") &&
+      (request.method === "GET" || request.method === "HEAD")
+    ) {
+      await serveFrontend(request, response, requestUrl.pathname);
+      return;
+    }
     sendJson(response, 404, { error: "API route not found." });
     return;
   }
