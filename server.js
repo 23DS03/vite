@@ -1,6 +1,6 @@
 import { createServer } from "node:http";
 
-const port = Number(process.env.API_PORT || 3001);
+const port = Number(process.env.PORT || process.env.API_PORT || 3001);
 const frontendOrigin = process.env.FRONTEND_ORIGIN?.trim().replace(/\/+$/, "");
 const apiKey = process.env.GROQ_API_KEY?.trim();
 const isGroqConfigured = Boolean(
